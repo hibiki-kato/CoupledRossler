@@ -10,9 +10,10 @@
 struct CoupledRossler{
     CoupledRossler(double input_omega1, double input_omega2, double input_epsilon, double input_a, double input_c, double input_f, double input_dt, double input_t_0, double input_t, double input_dump, Eigen::VectorXd input_x_0);
     ~CoupledRossler();
-    Eigen::MatrixXd get_trajectory_();
-    Eigen::VectorXd rk4_(const Eigen::VectorXd& present);
-    Eigen::VectorXd coupledRossler(const Eigen::VectorXd& present);
+    Eigen::MatrixXd get_trajectory();
+    Eigen::VectorXd rk4(const Eigen::VectorXd& present);
+    Eigen::VectorXd coupled_rossler(const Eigen::VectorXd& present);
+    Eigen::MatrixXd jacobi_matrix(const Eigen::VectorXd& state);
     double omega1;
     double omega2;
     double epsilon;

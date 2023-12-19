@@ -36,7 +36,7 @@ int main(){
     Eigen::VectorXd x_0 = (Eigen::VectorXd::Random(6).array() + 1) / 2;
     int numthreads = omp_get_max_threads();
     CoupledRossler CR(omega1, omega2, epsilon, a, c, f, dt, t_0, t, dump, x_0);
-    Eigen::MatrixXd trajectory = CR.get_trajectory_();
+    Eigen::MatrixXd trajectory = CR.get_trajectory();
     /*                                                                        
                   ██                                                                                                    
         ██████    ██                                                ██                                                  
@@ -160,7 +160,7 @@ int main(){
     plt::subplots_adjust(keywords);
 
     std::ostringstream oss;
-    oss << "../../phase/epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_dt" << dt << "_t" << t << "_dump" << dump << "_omega1" << omega1 << "_omega2" << omega2 << ".png";  // 文字列を結合する
+    oss << "../../phase/epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_dt" << dt << "_t" << t << "_dump" << dump << "_omega(" << omega1 << "," << omega2 << ").png";  // 文字列を結合する
     std::string plotfname = oss.str(); // 文字列を取得する
     std::cout << "Saving result to " << plotfname << std::endl;
     plt::save(plotfname);

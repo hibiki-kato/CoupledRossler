@@ -16,7 +16,13 @@
 #include <string>
 
 template <typename T>
-Eigen::Matrix<T, Eigen::Dynamic, 1> npy2EigenVec(const char* fname){
+Eigen::Matrix<T, Eigen::Dynamic, 1> npy2EigenVec(const char* fname, bool header = false){
+    if (header){
+        // fnameの先頭に../をつける
+        std::string fname_str = fname;
+        fname_str = "../" + fname_str;
+        fname = fname_str.c_str();
+    }
     cnpy::NpyArray arr = cnpy::npy_load(fname);
     T* loaded_data = arr.data<T>();
     int size = arr.shape[0];
@@ -28,7 +34,13 @@ Eigen::Matrix<T, Eigen::Dynamic, 1> npy2EigenVec(const char* fname){
 }
 
 template <typename T>
-Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> npy2EigenMat(const char* fname){
+Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> npy2EigenMat(const char* fname, bool header = false){
+    if (header){
+        // fnameの先頭に../をつける
+        std::string fname_str = fname;
+        fname_str = "../" + fname_str;
+        fname = fname_str.c_str();
+    }
     cnpy::NpyArray arr = cnpy::npy_load(fname);
     T* loaded_data = arr.data<T>();
     int size = arr.shape[0];

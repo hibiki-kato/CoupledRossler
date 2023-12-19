@@ -51,7 +51,7 @@ int main(){
 
     std::cout << "calculating trajectory" << std::endl;
     CoupledRossler CR(omega1, omega2, epsilon, a, c, f, dt, t_0, t, dump, x_0);
-    Eigen::MatrixXd trajectory = CR.get_trajectory_(); //wide matrix
+    Eigen::MatrixXd trajectory = CR.get_trajectory(); //wide matrix
     Eigen::MatrixXd angles = Eigen::MatrixXd::Zero(trajectory.cols(), 2);
     for(int i=0; i < trajectory.cols(); i++){
         angles(i, 0) = std::atan2(trajectory(1, i), trajectory(0, i));

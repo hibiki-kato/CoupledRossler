@@ -357,7 +357,7 @@ bool isLaminar(Eigen::VectorXd phases, double sync_criteria, double center){
 }
 
 std::tuple<Eigen::VectorXd, Eigen::VectorXd, Eigen::VectorXd> calc_next(CoupledRossler& CR, Eigen::VectorXd pre_n, Eigen::VectorXd pre_theta, Eigen::VectorXd previous){
-    Eigen::VectorXd now = CR.rk4_(previous);
+    Eigen::VectorXd now = CR.rk4(previous);
     Eigen::VectorXd theta(2);
     theta(0) = std::atan2(now(1), now(0)); // rotation angle of system1
     theta(1) = std::atan2(now(4), now(3)); // rotation angle of system2

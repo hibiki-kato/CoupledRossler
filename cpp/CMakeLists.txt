@@ -6,7 +6,7 @@ set(CMAKE_CXX_COMPILER g++)
 set(CMAKE_CXX_STANDARD 23)
 set(EXECUTABLE exe)
 add_executable(${EXECUTABLE} 
-    trajectory.cpp
+    lyapunov.cpp
     CoupledRossler.cpp
     myFunc.cpp
 )

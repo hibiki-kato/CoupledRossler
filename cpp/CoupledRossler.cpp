@@ -30,7 +30,7 @@ CoupledRossler::CoupledRossler(double input_omega1, double input_omega2, double 
 CoupledRossler::~CoupledRossler(){
 }
 
-Eigen::MatrixXd CoupledRossler::get_trajectory_(){
+Eigen::MatrixXd CoupledRossler::get_trajectory(){
     int row = 6 + 1;
     Eigen::MatrixXd trajectory(row, steps+1);
 
@@ -38,28 +38,28 @@ Eigen::MatrixXd CoupledRossler::get_trajectory_(){
     trajectory.topLeftCorner(row - 1, 1) = x_0;
     //renew x_0 while reaching latter (dump)
     for (long i = 0; i < dump_steps; i++){
-        trajectory.topLeftCorner(row - 1, 1) = CoupledRossler::rk4_(trajectory.topLeftCorner(row - 1, 1));
+        trajectory.topLeftCorner(row - 1, 1) = CoupledRossler::rk4(trajectory.topLeftCorner(row - 1, 1));
     }
     //solve
     double time = t_0;
     trajectory(row-1, 0) = time;
     for(long i = 0; i < steps; i++){
         time += dt;
-        trajectory.block(0, i+1, row-1, 1) = CoupledRossler::rk4_(trajectory.block(0, i, row-1, 1));
+        trajectory.block(0, i+1, row-1, 1) = CoupledRossler::rk4(trajectory.block(0, i, row-1, 1));
         trajectory(row-1, i+1) = time;
     }
     return trajectory;
 }
 
-Eigen::VectorXd CoupledRossler::rk4_(const Eigen::VectorXd& present){
-    Eigen::VectorXd k1 = dt * CoupledRossler::coupledRossler(present);
-    Eigen::VectorXd k2 = dt * CoupledRossler::coupledRossler(present.array() + k1.array() /2);
-    Eigen::VectorXd k3 = dt * CoupledRossler::coupledRossler(present.array() + k2.array() /2);
-    Eigen::VectorXd k4 = dt * CoupledRossler::coupledRossler(present.array() + k3.array());
+Eigen::VectorXd CoupledRossler::rk4(const Eigen::VectorXd& present){
+    Eigen::VectorXd k1 = dt * CoupledRossler::coupled_rossler(present);
+    Eigen::VectorXd k2 = dt * CoupledRossler::coupled_rossler(present.array() + k1.array() /2);
+    Eigen::VectorXd k3 = dt * CoupledRossler::coupled_rossler(present.array() + k2.array() /2);
+    Eigen::VectorXd k4 = dt * CoupledRossler::coupled_rossler(present.array() + k3.array());
     return present.array() + (k1.array() + 2 * k2.array() + 2 * k3.array() + k4.array()) / 6;
 }
 
-Eigen::VectorXd CoupledRossler::coupledRossler(const Eigen::VectorXd& state){
+Eigen::VectorXd CoupledRossler::coupled_rossler(const Eigen::VectorXd& state){
     double x1 = state(0);
     double y1 = state(1);
     double z1 = state(2);
@@ -68,8 +68,8 @@ Eigen::VectorXd CoupledRossler::coupledRossler(const Eigen::VectorXd& state){
     double z2 = state(5);
 
     double dx1 = -omega1 * y1 - z1 + epsilon * (x2 - x1);
-    double dy1 = omega1 * x1 + 0.165 * y1;
-    double dz1 = f + z1 * (x1 - 10);
+    double dy1 = omega1 * x1 + a * y1;
+    double dz1 = f + z1 * (x1 - c);
 
     double dx2 = -omega2 * y2 - z2 + epsilon * (x1 - x2);
     double dy2 = omega2 * x2 + a * y2;
@@ -81,4 +81,21 @@ Eigen::VectorXd CoupledRossler::coupledRossler(const Eigen::VectorXd& state){
     return dt_f;
 }
 
-// Eigen::MatrixXd CoupledRossler::jacobi
+Eigen::MatrixXd CoupledRossler::jacobi_matrix(const Eigen::VectorXd& state){
+    double x1 = state(0);
+    double y1 = state(1);
+    double z1 = state(2);
+    double x2 = state(3);
+    double y2 = state(4);
+    double z2 = state(5);
+
+    Eigen::MatrixXd J(6, 6);
+    J << -epsilon, -omega1, -1, epsilon, 0, 0,
+        omega1, a, 0, 0, 0, 0,
+        z1, 0, x1-c, 0, 0, 0,
+        epsilon, 0, 0, -epsilon, -omega2, -1,
+        0, 0, 0, omega2, a, 0,
+        0, 0, 0, z2, 0, x2-c;
+
+    return J;
+}

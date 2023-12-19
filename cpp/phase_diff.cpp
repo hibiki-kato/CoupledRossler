@@ -30,17 +30,16 @@ int main(){
     double dump = 1e+2;
     double omega1 = 0.95;
     double omega2 = 0.99;
-    double epsilon = 0.039;
+    double epsilon = 0.03;
     double a = 0.165;
     double c = 10;
     double f = 0.2;
     Eigen::VectorXd x_0 = (Eigen::VectorXd::Random(6).array()) * 10;
-    std::cout << "x: " << x_0 << std::endl;
     int numthreads = omp_get_max_threads();
     CoupledRossler CR(omega1, omega2, epsilon, a, c, f, dt, t_0, t, dump, x_0);
 
     std::cout << "calculating trajectory" << std::endl;
-    Eigen::MatrixXd trajectory = CR.get_trajectory_(); //wide matrix
+    Eigen::MatrixXd trajectory = CR.get_trajectory(); //wide matrix
     // Eigen::MatrixXd trajectory = npy2EigenMat<std::complex<double>>("../../generated_lam/sync_gen_laminar_beta_0.43nu_0.00018_dt0.01_5000period3000check100progress10^-8-10^-5perturb_4-7_4-10_4-13_7-10_7-13_10-13_5-8_5-11_5-14_8-11_8-14_11-14_6-9_6-12_9-12.npy"); //wide matrix
     // Eigen::MatrixXd trajectory = trajectory_.leftCols(500000);
 
@@ -94,7 +93,7 @@ int main(){
     plotSettings["font.size"] = "15";
     plt::rcparams(plotSettings);
     // Set the size of output image = 1200x780 pixels
-    plt::figure_size(1200, 800);
+    plt::figure_size(2400, 1600);
 
     std::vector<double> x((trajectory.cols()-1)/skip),y((trajectory.cols()-1)/skip);
 
@@ -130,7 +129,7 @@ int main(){
     plt::ylabel("$|\\phi_1 -\\phi_2|$");
 
     std::ostringstream oss;
-    oss << "../../phase_diff/epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_dt" << dt << "_t" << t << "_dump" << dump << "_omega1" << omega1 << "_omega2" << omega2 << ".png";  // 文字列を結合する
+    oss << "../../phase_diff/epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_dt" << dt << "_t" << t << "_dump" << dump << "_omega(" << omega1 << "," << omega2 << ").png";  // 文字列を結合する
     std::string plotfname = oss.str(); // 文字列を取得する
     std::cout << "Saving result to " << plotfname << std::endl;
     plt::save(plotfname);
