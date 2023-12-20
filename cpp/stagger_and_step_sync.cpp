@@ -30,23 +30,23 @@ int main(){
     auto start = std::chrono::system_clock::now(); // 計測開始時間
     double dt = 0.01;
     double t_0 = 0;
-    double t = 10000;
+    double t = 1e+5;
     double dump = 0;
     double omega1 = 0.95;
     double omega2 = 0.99;
-    double epsilon = 0.039;
+    double epsilon = 0.038;
     double a = 0.165;
     double c = 10;
     double f = 0.2;
     // Eigen::MatrixXd loaded = npy2EigenMat<double>("../../generated_lam/sync_gen_laminar_beta_0.417nu_0.00018_dt0.01_53000period5000check500progress10^-14-10^-5perturb_5-8_5-11_5-14_8-11_8-14_11-14_6-9_6-12_9-12.npy");
     // Eigen::VectorXd x_0 = loaded.block(0, t_0*100, 6, 1);
-    Eigen::VectorXd x_0 = npy2EigenVec<double>("../../initials/epsilon0.039_a0.165_c10_f0.2_omega(0.95,0.99)_t1500.npy");
+    Eigen::VectorXd x_0 = npy2EigenVec<double>("../initials/epsilon0.038_a0.165_c10_f0.2_omega0.95-0.99_t2000.npy", true);
     // Eigen::VectorXd x_0 = (Eigen::VectorXd::Random(6).array()) * 10;
 
     double check = 1500;
     double progress = 100;
     int perturb_min = -15;
-    int perturb_max = 0;
+    int perturb_max = -8;
     int limit = 1e+6; //limitation of trial of stagger and step
     double sync_criteria = 0.8; 
     double d = 1.2; //  if phase_diff is in 2πk + d ± sync_criteria then it is synchronized
@@ -211,7 +211,7 @@ int main(){
                         if (perturbation_size < min_perturbation){
                             min_perturbation = perturbation_size;
                         }
-                        std::cout << "overall perturbation scale here is " << perturbation_size << std::endl;
+                        std::cout << " overall perturbation scale here is " << perturbation_size << std::endl;
                         CR.t_0 = Local_trajectory.bottomRightCorner(1, 1)(0, 0);
                         CR.x_0 = Local_trajectory.topRightCorner(num_variables, 1);
                         calced_laminar.middleCols(i*progress_steps, progress_steps+1) = Local_trajectory;
@@ -287,7 +287,7 @@ int main(){
     plt::plot(x_first, y_first, firstPointSettings);
 
     std::ostringstream oss;
-    oss << "../../generated_lam_imag/sync_gen_laminar_epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_omega1" << omega1 << "_omega2" << omega2 << "_t" << t << check << "check" << progress << "progress10^" << logged_min_perturbation<<"-10^"<< logged_max_perturbation << "perturb.png";
+    oss << "../../generated_lam_imag/sync_gen_laminar_epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_omega1" << omega1 << "_omega2" << omega2 << "_t" << t << "_" << check << "check" << progress << "progress10^" << logged_min_perturbation<<"-10^"<< logged_max_perturbation << "perturb.png";
     std::string filename = oss.str(); // 文字列を取得する
     if (calced_laminar.cols() > 1){
         std::cout << "\n Saving result to " << filename << std::endl;
@@ -319,12 +319,12 @@ int main(){
     oss.str("");
     if(calced_laminar.cols() > 1){
         if (progress == t){
-            oss << "../../initials/epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_omega(" << omega1 << "," << omega2 << ")_t" << t <<".npy";
+            oss << "../../initials/epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_omega" << omega1 << "-" << omega2 << "_t" << t <<".npy";
             std::string fname = oss.str(); // 文字列を取得する
             std::cout << "saving as " << fname << std::endl;
             EigenVec2npy(calced_laminar.topLeftCorner(calced_laminar.rows()-1, 1).col(0), fname);
         } else{
-            oss << "../../generated_lam/sync_gen_laminar_epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_omega(" << omega1 << "," << omega2 << ")_t" << t << check << "check" << progress << "progress10^" << logged_min_perturbation<<"-10^"<< logged_max_perturbation << "perturb.npy";
+            oss << "../../generated_lam/sync_gen_laminar_epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_omega" << omega1 << "-" << omega2 << "_t" << t << check << "check" << progress << "progress10^" << logged_min_perturbation<<"-10^"<< logged_max_perturbation << "perturb.npy";
             std::string fname = oss.str(); // 文字列を取得する
             std::cout << "saving as " << fname << std::endl;
             EigenMat2npy(calced_laminar, fname);

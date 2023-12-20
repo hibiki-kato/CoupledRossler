@@ -15,12 +15,12 @@ int main(){
     auto start = std::chrono::system_clock::now(); // 計測開始時間
     double dt = 0.01;
     double t_0 = 0;
-    double t = 1e+5;
-    double dump = 1e+2;
+    double t = 1e+4;
+    double dump = 1e+3;
     double omega1 = 0.95;
     double omega2 = 0.99;
-    double epsilon = 0.0415;
-    double a = -0.165;
+    double epsilon = 0.038;
+    double a = 0.165;
     double c = 10;
     double f = 0.2;
     Eigen::VectorXd x_0 = (Eigen::VectorXd::Random(6).array()) * 10;
@@ -29,7 +29,7 @@ int main(){
     Eigen::MatrixXd trajectory = CR.get_trajectory();
 
     int plot_dim1 = 1;
-    int plot_dim2 = 2;
+    int plot_dim2 = 4;
     int skip = 1; // plot every skip points
     // /*
     //         █

@@ -43,13 +43,13 @@ int main() {
     double dump = 1e+3;
     double omega1 = 0.95;
     double omega2 = 0.99;
-    double epsilon = 0.0416;
+    double epsilon = 0.038;
     double a = 0.165;
     double c = 10;
     double f = 0.2;
     Eigen::VectorXd x_0 = (Eigen::VectorXd::Random(6).array()) * 10;
     
-    int numthreads = omp_get_max_threads();
+    int numThreads = 1; //正確な計算を行うためには1スレッドで実行する必要がある
     CoupledRossler CR(omega1, omega2, epsilon, a, c, f, dt, t_0, t, dump, x_0);
 
     // std::string suffix = "laminar"; //ファイル名の後ろにつける文字列
@@ -58,13 +58,23 @@ int main() {
     std::cout << "calculating trajectory" << std::endl;
     Eigen::MatrixXd traj =  CR.get_trajectory();
     // データの読み込みをここに記述
-    // Eigen::MatrixXd traj = npy2EigenMat<double>("../../generated_lam/generated_laminar_beta_0.417nu_0.00018_dt0.01_50000period1300check200progresseps0.05.npy");
+    // Eigen::MatrixXd traj = npy2EigenMat<double>("../generated_lam/sync_gen_laminar_epsilon0.038_a0.165_c10_f0.2_omega0.95-0.99_t100000_1500check100progress10^-16-10^-9perturb.npy", true);
     
     Eigen::MatrixXd Data = traj.topRows(traj.rows() - 1);
     
     int dim = Data.rows() - 1;
     int numTimeSteps = Data.cols();
     int numVariables = Data.rows();
+
+    std::cout << "calculating lyapunov exponents" << std::endl;
+    //DataをnumThreads個に分割する(実際に分割しないが，分割したときのインデックスを計算する)
+    std::vector<int> splitIndex(numThreads + 1);
+    splitIndex[0] = 0;
+    splitIndex[numThreads] = numTimeSteps;
+    for (int i = 1; i < numThreads; ++i) {
+        splitIndex[i] = numTimeSteps / numThreads * i;
+    }
+    
 
     //任意の直行行列を用意する
     MatrixXd Base = Eigen::MatrixXd::Random(numVariables, numVariables);
@@ -74,34 +84,44 @@ int main() {
     VectorXd sum = Eigen::VectorXd::Zero(numVariables);
     // 次のステップ(QR分解されるもの)
     MatrixXd next(numVariables, numVariables);
+    
+    #pragma omp declare reduction(vec_add : Eigen::VectorXd : omp_out += omp_in) \
+        initializer(omp_priv = Eigen::VectorXd::Zero(omp_orig.size()))
+    
+    #pragma omp parallel for num_threads(numThreads) firstprivate(CR, next, Base, dt) shared(Data, splitIndex) reduction(vec_add:sum)
+    for (int i = 0; i < numThreads; ++i) {
+        CoupledRossler local_CR = CR;
+        for (int j = splitIndex[i]; j < splitIndex[i + 1]; ++j) {
+            // 進捗の表示
+            if (i == numThreads - 1){
+                if (j % (numTimeSteps/10000) == 0){
+                    std::cout << "\r" <<  (j - splitIndex[numThreads - 1]) / static_cast<double>(splitIndex[numThreads] - splitIndex[numThreads - 1]) * 100 << "%" << std::flush;
+                }
+            }
+            // ヤコビアンの計算
+            Eigen::MatrixXd jacobian = local_CR.jacobi_matrix(Data.col(j));
+            // ヤコビアンとBase(直行行列)の積を計算する
+            for (int k = 0; k < numVariables; ++k) {
+                next.col(k) = rungeKuttaJacobian(Base.col(k), jacobian, dt);
+            }
+            // QR分解を行う
+            HouseholderQR<MatrixXd> qr(next);
+            // 直交行列QでBaseを更新
+            Base = qr.householderQ();
+            // Rの対角成分を総和に加える
+            Eigen::MatrixXd R = qr.matrixQR().triangularView<Eigen::Upper>();
+            // Rの対角成分の絶対値のlogをsumにたす
+            Eigen::VectorXd diag = R.diagonal().cwiseAbs().array().log();
 
-    for (int i = 0; i < numTimeSteps; ++i) {
-        std::cout << "\r processing..." << i << "/" << numTimeSteps << std::flush;
-        // ヤコビアンの計算
-        Eigen::MatrixXd jacobian = CR.jacobi_matrix(Data.col(i));
-        // ヤコビアンとBase(直行行列)の積を計算する
-        #pragma omp paralell for num_threads(threads)
-        for (int j = 0; j < numVariables; ++j) {
-            next.col(j) = rungeKuttaJacobian(Base.col(j), jacobian, dt); //線型ソルバで良い(要計算　計算コスト)
+            sum += diag;
+            // 途中経過の表示
+            // if (j % 10000 == 0){
+            //     std::cout << "\r" <<  sum(0) / (j+1) / dt << std::endl;
+            // }
         }
-
-        // QR分解を行う
-        HouseholderQR<MatrixXd> qr(next);
-        // 直交行列QでBaseを更新
-        Base = qr.householderQ();
-        // Rの対角成分を総和に加える
-        Eigen::MatrixXd R = qr.matrixQR().triangularView<Eigen::Upper>();
-        // Rの対角成分の絶対値のlogをsumにたす
-        Eigen::VectorXd diag = R.diagonal().cwiseAbs().array().log();
-        sum += diag;
-
-        // 進捗表示
-        // if (i % 10000 == 0){
-        //     std::cout << "\r" <<  sum(0) / (i+1) / dt << std::flush;
-        // }
     }
 
-    VectorXd lyapunovExponents = sum.array() / numTimeSteps / dt;
+    VectorXd lyapunovExponents = sum.array() / (numTimeSteps * dt); // 1秒あたりの変化量に変換
 
     // 結果の表示
     std::cout << lyapunovExponents.rows() << std::endl;
