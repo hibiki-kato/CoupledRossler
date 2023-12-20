@@ -39,11 +39,11 @@ int main() {
     auto start = std::chrono::system_clock::now(); // 計測開始時間
     double dt = 0.01;
     double t_0 = 0;
-    double t = 1e+5;
+    double t = 1e+6;
     double dump = 1e+4;
     double omega1 = 0.95;
     double omega2 = 0.99;
-    double epsilon = 0.041;
+    double epsilon = 0.039;
     double a = 0.165;
     double c = 10;
     double f = 0.2;
@@ -55,17 +55,16 @@ int main() {
         x_0(i) = dist(engine);
     }
     
-    int numThreads = 1; //正確な計算を行うためには1スレッドで実行する必要がある
+    int numThreads = 8; //正確な計算を行うためには1スレッドで実行する必要がある
     CoupledRossler CR(omega1, omega2, epsilon, a, c, f, dt, t_0, t, dump, x_0);
-
-    // std::string suffix = "laminar"; //ファイル名の後ろにつける文字列
-    std::string suffix = ""; //ファイル名の後ろにつける文字列
     // 計算
     std::cout << "calculating trajectory" << std::endl;
     Eigen::MatrixXd traj =  CR.get_trajectory();
+    std::string suffix = ""; //ファイル名の後ろにつける文字列
     // データの読み込みをここに記述
-    // Eigen::MatrixXd traj = npy2EigenMat<double>("../generated_lam/sync_gen_laminar_epsilon0.039_a0.165_c10_f0.2_omega0.95-0.99_t1000002000check100progress10^-16-10^-9perturb.npy", true);
-    
+    // Eigen::MatrixXd traj = npy2EigenMat<double>("../generated_lam/sync_gen_laminar_epsilon0.037_a0.165_c10_f0.2_omega0.95-0.99_t1000001000check100progress10^-16-10^-9perturb.npy", true);
+    // std::string suffix = "laminar"; //ファイル名の後ろにつける文字列
+
     Eigen::MatrixXd Data = traj.topRows(traj.rows() - 1);
     
     int dim = Data.rows() - 1;
@@ -73,8 +72,11 @@ int main() {
     int numVariables = Data.rows();
 
     // 軌道の確認
-    std::vector<double> x1(Data.row(0).data(), Data.row(0).data() + numTimeSteps);
-    std::vector<double> x2(Data.row(3).data(), Data.row(3).data() + numTimeSteps);
+    std::vector<double> x1(numTimeSteps), x2(numTimeSteps);
+    for (int i = 0; i < numTimeSteps; ++i) {
+        x1[i] = Data(0, i);
+        x2[i] = Data(3, i);
+    }
     plt::scatter(x1, x2);
     plt::save("traj.png");
     plt::clf();

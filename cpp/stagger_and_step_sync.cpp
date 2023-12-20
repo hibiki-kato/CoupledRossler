@@ -30,21 +30,21 @@ int main(){
     auto start = std::chrono::system_clock::now(); // 計測開始時間
     double dt = 0.01;
     double t_0 = 0;
-    double t = 1e+5;
+    double t = 1e+6;
     double dump = 0;
     double omega1 = 0.95;
     double omega2 = 0.99;
-    double epsilon = 0.039;
+    double epsilon = 0.038;
     double a = 0.165;
     double c = 10;
     double f = 0.2;
     // Eigen::MatrixXd loaded = npy2EigenMat<double>("../../generated_lam/sync_gen_laminar_beta_0.417nu_0.00018_dt0.01_53000period5000check500progress10^-14-10^-5perturb_5-8_5-11_5-14_8-11_8-14_11-14_6-9_6-12_9-12.npy");
     // Eigen::VectorXd x_0 = loaded.block(0, t_0*100, 6, 1);
-    Eigen::VectorXd x_0 = npy2EigenVec<double>("../initials/epsilon0.039_a0.165_c10_f0.2_omega0.95-0.99_t2000.npy", true);
+    Eigen::VectorXd x_0 = npy2EigenVec<double>("../initials/epsilon0.037_a0.165_c10_f0.2_omega0.95-0.99_t1000.npy", true);
     // Eigen::VectorXd x_0 = (Eigen::VectorXd::Random(6).array()) * 10;
 
-    double check = 2000;
-    double progress = 100;
+    double check = 1500;
+    double progress = 200;
     int perturb_min = -15;
     int perturb_max = -8;
     int limit = 1e+6; //limitation of trial of stagger and step
