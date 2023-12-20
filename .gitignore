@@ -1,5 +1,7 @@
 build/
 *.npy
+!initials/*
+
+.DS_Store
 .vscode/
 .ipynb_checkpoints/
-.DS_Store
