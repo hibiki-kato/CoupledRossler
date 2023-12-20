@@ -6,7 +6,7 @@ set(CMAKE_CXX_COMPILER g++)
 set(CMAKE_CXX_STANDARD 23)
 set(EXECUTABLE exe)
 add_executable(${EXECUTABLE} 
-    trajectory.cpp
+    stagger_and_step_sync.cpp
     CoupledRossler.cpp
     myFunc.cpp
 )

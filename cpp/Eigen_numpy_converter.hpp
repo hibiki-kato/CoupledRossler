@@ -25,7 +25,7 @@ Eigen::Matrix<T, Eigen::Dynamic, 1> npy2EigenVec(const char* fname, bool header 
     }else{
         fname_str = fname;
     }
-    cnpy::NpyArray arr = cnpy::npy_load(fname);
+    cnpy::NpyArray arr = cnpy::npy_load(fname_str);
     T* loaded_data = arr.data<T>();
     int size = arr.shape[0];
     Eigen::Matrix<T, Eigen::Dynamic, 1> Vec(size);
