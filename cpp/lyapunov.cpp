@@ -40,14 +40,20 @@ int main() {
     double dt = 0.01;
     double t_0 = 0;
     double t = 1e+5;
-    double dump = 1e+3;
+    double dump = 1e+4;
     double omega1 = 0.95;
     double omega2 = 0.99;
-    double epsilon = 0.038;
+    double epsilon = 0.041;
     double a = 0.165;
     double c = 10;
     double f = 0.2;
-    Eigen::VectorXd x_0 = (Eigen::VectorXd::Random(6).array()) * 10;
+    Eigen::VectorXd x_0 = npy2EigenVec<double>("../initials/chaotic.npy", true);
+    std::random_device seed_gen;
+    std::mt19937 engine(seed_gen());
+    std::uniform_real_distribution<> dist(-10, 10);
+    for (int i = 0; i < x_0.rows(); ++i) {
+        x_0(i) = dist(engine);
+    }
     
     int numThreads = 1; //正確な計算を行うためには1スレッドで実行する必要がある
     CoupledRossler CR(omega1, omega2, epsilon, a, c, f, dt, t_0, t, dump, x_0);
@@ -58,13 +64,21 @@ int main() {
     std::cout << "calculating trajectory" << std::endl;
     Eigen::MatrixXd traj =  CR.get_trajectory();
     // データの読み込みをここに記述
-    // Eigen::MatrixXd traj = npy2EigenMat<double>("../generated_lam/sync_gen_laminar_epsilon0.038_a0.165_c10_f0.2_omega0.95-0.99_t100000_1500check100progress10^-16-10^-9perturb.npy", true);
+    // Eigen::MatrixXd traj = npy2EigenMat<double>("../generated_lam/sync_gen_laminar_epsilon0.039_a0.165_c10_f0.2_omega0.95-0.99_t1000002000check100progress10^-16-10^-9perturb.npy", true);
     
     Eigen::MatrixXd Data = traj.topRows(traj.rows() - 1);
     
     int dim = Data.rows() - 1;
     int numTimeSteps = Data.cols();
     int numVariables = Data.rows();
+
+    // 軌道の確認
+    std::vector<double> x1(Data.row(0).data(), Data.row(0).data() + numTimeSteps);
+    std::vector<double> x2(Data.row(3).data(), Data.row(3).data() + numTimeSteps);
+    plt::scatter(x1, x2);
+    plt::save("traj.png");
+    plt::clf();
+    std::cout << "check traj.png" << std::endl;
 
     std::cout << "calculating lyapunov exponents" << std::endl;
     //DataをnumThreads個に分割する(実際に分割しないが，分割したときのインデックスを計算する)
@@ -90,7 +104,6 @@ int main() {
     
     #pragma omp parallel for num_threads(numThreads) firstprivate(CR, next, Base, dt) shared(Data, splitIndex) reduction(vec_add:sum)
     for (int i = 0; i < numThreads; ++i) {
-        CoupledRossler local_CR = CR;
         for (int j = splitIndex[i]; j < splitIndex[i + 1]; ++j) {
             // 進捗の表示
             if (i == numThreads - 1){
@@ -99,7 +112,7 @@ int main() {
                 }
             }
             // ヤコビアンの計算
-            Eigen::MatrixXd jacobian = local_CR.jacobi_matrix(Data.col(j));
+            Eigen::MatrixXd jacobian = CR.jacobi_matrix(Data.col(j));
             // ヤコビアンとBase(直行行列)の積を計算する
             for (int k = 0; k < numVariables; ++k) {
                 next.col(k) = rungeKuttaJacobian(Base.col(k), jacobian, dt);
@@ -148,7 +161,7 @@ int main() {
     plt::xlabel("Number");
     plt::ylabel("Lyapunov Exponents");
     std::ostringstream oss;
-    oss << "../../lyapunov/epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_dt" << dt << "_t" << t << "_omega(" << omega1 << "," << omega2 << ")_" << suffix << ".png";  // 文字列を結合する
+    oss << "../../lyapunov/img/epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_dt" << dt << "_t" << t << "_omega(" << omega1 << "," << omega2 << ")_" << suffix << ".png";  // 文字列を結合する
     std::string plotfname = oss.str(); // 文字列を取得する
     std::cout << "Saving result to " << plotfname << std::endl;
     plt::save(plotfname);

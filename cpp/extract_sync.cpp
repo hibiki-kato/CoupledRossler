@@ -32,7 +32,7 @@ int main(){
     double dump = 0;
     double omega1 = 0.95;
     double omega2 = 0.99;
-    double epsilon = 0.039;
+    double epsilon = 0.037;
     double a = 0.165;
     double c = 10;
     double f = 0.2;
@@ -137,7 +137,7 @@ int main(){
     plt::scatter(x, y);
     plt::show();
     std::ostringstream oss;
-    oss << "../../sync/sync_epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_dt" << dt << "_t" << t << "_dump" << dump << "_omega(" << omega1 << "," << omega2 << ")"<<  window <<"window.png";
+    oss << "../../sync/sync_epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_dt" << dt << "_t" << t << "_dump" << dump << "_omega" << omega1 << "-" << omega2 << "_"<<  window <<"window.png";
     std::string plotfname = oss.str(); // 文字列を取得する
     std::cout << "Saving result to " << plotfname << std::endl;
     plt::save(plotfname);
@@ -158,7 +158,7 @@ int main(){
     */
         // reset oss
     oss.str("");
-
+    oss << "../../sync/sync_epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_dt" << dt << "_t" << t << "_dump" << dump << "_omega" << omega1 << "-" << omega2 << "_"<<  window <<"window.npy";
     std::string fname = oss.str(); // 文字列を取得する
     std::cout << "Saving result to " << fname << std::endl;
     Eigen::MatrixXd matrix(synced.size(), synced[0].size());
@@ -167,7 +167,7 @@ int main(){
             matrix(i, j) = synced[i][j];
         }
     }
-    // EigenMt2npy(matrix, fname);
+    EigenMat2npy(matrix, fname);
 
     myfunc::duration(start, std::chrono::system_clock::now());
 }

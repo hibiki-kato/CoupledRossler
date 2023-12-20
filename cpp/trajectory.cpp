@@ -15,21 +15,22 @@ int main(){
     auto start = std::chrono::system_clock::now(); // 計測開始時間
     double dt = 0.01;
     double t_0 = 0;
-    double t = 1e+4;
-    double dump = 1e+3;
+    double t = 1e+5;
+    double dump = 1e+4;
     double omega1 = 0.95;
     double omega2 = 0.99;
-    double epsilon = 0.038;
+    double epsilon = 0.03;
     double a = 0.165;
     double c = 10;
     double f = 0.2;
     Eigen::VectorXd x_0 = (Eigen::VectorXd::Random(6).array()) * 10;
+    // Eigen::VectorXd x_0 = npy2EigenVec<double>("../initials/chaotic.npy", true);
 
     CoupledRossler CR(omega1, omega2, epsilon, a, c, f, dt, t_0, t, dump, x_0);
     Eigen::MatrixXd trajectory = CR.get_trajectory();
 
     int plot_dim1 = 1;
-    int plot_dim2 = 4;
+    int plot_dim2 = 5;
     int skip = 1; // plot every skip points
     // /*
     //         █
@@ -66,7 +67,7 @@ int main(){
     // plt::ylim(-17, 20);
     plt::scatter(x,y, 1);
     std::ostringstream oss;
-    oss << "../../traj_imag/epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_dt" << dt << "_t" << t << "_dump" << dump << "_omega(" << omega1 << "," << omega2 << ").png";  // 文字列を結合する
+    oss << "../../traj_img/epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_dt" << dt << "_t" << t << "_dump" << dump << "_omega(" << omega1 << "," << omega2 << ").png";  // 文字列を結合する
     std::string plotfname = oss.str(); // 文字列を取得する
     std::cout << "Saving result to " << plotfname << std::endl;
     plt::save(plotfname);
@@ -91,7 +92,7 @@ int main(){
     oss << "../../traj/epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_dt" << dt << "_t" << t << "_dump" << dump << "_omega(" << omega1 << "," << omega2 << ").npy";  // 文字列を結合する
     std::string npyfname = oss.str();
     std::cout << "Saving result to " << npyfname << std::endl;
-    EigenMat2npy(trajectory, npyfname);
+    // EigenMat2npy(trajectory, npyfname);
     
     myfunc::duration(start, std::chrono::system_clock::now());
 }
