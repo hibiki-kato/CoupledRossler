@@ -40,7 +40,7 @@ int main(){
     double f = 0.2;
     // Eigen::MatrixXd loaded = npy2EigenMat<double>("../../generated_lam/sync_gen_laminar_beta_0.417nu_0.00018_dt0.01_53000period5000check500progress10^-14-10^-5perturb_5-8_5-11_5-14_8-11_8-14_11-14_6-9_6-12_9-12.npy");
     // Eigen::VectorXd x_0 = loaded.block(0, t_0*100, 6, 1);
-    Eigen::VectorXd x_0 = npy2EigenVec<double>("../initials/epsilon0.037_a0.165_c10_f0.2_omega0.95-0.99_t1000.npy", true);
+    Eigen::VectorXd x_0 = npy2EigenVec<double>("../initials/epsilon0.038_a0.165_c10_f0.2_omega0.95-0.99_t1500.npy", true);
     // Eigen::VectorXd x_0 = (Eigen::VectorXd::Random(6).array()) * 10;
 
     double check = 1500;
