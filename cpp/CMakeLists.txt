@@ -5,18 +5,12 @@ set(CMAKE_C_COMPILER gcc)
 set(CMAKE_CXX_COMPILER g++)
 set(CMAKE_CXX_STANDARD 23)
 set(EXECUTABLE exe)
+
 add_executable(${EXECUTABLE} 
     stagger_and_step_sync.cpp
     CoupledRossler.cpp
     myFunc.cpp
 )
-
-# message(STATUS "CMAKE_VERSION:${CMAKE_VERSION}" )
-# message(STATUS "include_directories(PYTHON_INCLUDE_DIRS):${PYTHON_INCLUDE_DIRS}" )
-# message(STATUS "include_directories(Python_INCLUDE_DIRS):${Python_INCLUDE_DIRS}" )
-# message(STATUS "include_directories(PYTHON_LIBRARIES):${PYTHON_LIBRARIES}" )
-# message(STATUS "include_directories(Python_LIBRARIES):${Python_LIBRARIES}" )
-# message(STATUS "include_directories(Python_LIBRARY_DIRS):${Python_LIBRARY_DIRS}" )
 
 # OSでソースが異なるので分岐
 if($ENV{OS_NAME} STREQUAL "Darwin")

@@ -6,7 +6,7 @@
 #include <random>
 
 //constructor
-CoupledRossler::CoupledRossler(double input_omega1, double input_omega2, double input_epsilon, double input_a, double input_c, double input_f, double input_dt, double input_t_0, double input_t, double input_dump, Eigen::VectorXd input_x_0){
+CoupledRossler::CoupledRossler(CRparams input_params, double input_dt, double input_t_0, double input_t, double input_dump, Eigen::VectorXd input_x_0){
     dt = input_dt;
     t_0 = input_t_0;
     t = input_t;
@@ -14,12 +14,12 @@ CoupledRossler::CoupledRossler(double input_omega1, double input_omega2, double 
     x_0 = input_x_0;
 
     //parameters
-    omega1 = input_omega1;
-    omega2 = input_omega2;
-    epsilon = input_epsilon;
-    a = input_a;
-    c = input_c;
-    f = input_f;
+    omega1 = input_params.omega1;
+    omega2 = input_params.omega2;
+    epsilon = input_params.epsilon;
+    a = input_params.a;
+    c = input_params.c;
+    f = input_params.f;
     
     int dim = 6;
     

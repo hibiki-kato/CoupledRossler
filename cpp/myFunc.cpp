@@ -1,4 +1,7 @@
 #include "myFunc.hpp"
+#include <iostream>
+#include <chrono>
+#include <cmath>
 
 namespace myfunc{
     void duration(std::chrono::time_point<std::chrono::system_clock> start, std::chrono::time_point<std::chrono::system_clock> end){

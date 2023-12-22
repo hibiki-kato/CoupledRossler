@@ -28,21 +28,22 @@ int main(){
     auto start = std::chrono::system_clock::now(); // 計測開始時間
     double dt = 0.01;
     double t_0 = 0;
-    double t = 1e+6;
+    double t = 1e+5;
     double dump = 0;
-    double omega1 = 0.95;
-    double omega2 = 0.99;
-    double epsilon = 0.037;
-    double a = 0.165;
-    double c = 10;
-    double f = 0.2;
+    CRparams params;
+    params.omega1 = 0.95;
+    params.omega2 = 0.99;
+    params.epsilon = 0.035;
+    params.a = 0.165;
+    params.c = 10;
+    params.f = 0.2;
     Eigen::VectorXd x_0 = (Eigen::VectorXd::Random(6).array()) * 10;
     double sync_criteria = 0.8;
     double d = 1.2; //  if phase_diff is in 2πk + d ± sync_criteria then it is synchronized
 
-    int window = 1000; // how long the sync part should be. (sec)
+    int window = 500; // how long the sync part should be. (sec)
     window *= 100; // 100 when dt = 0.01 
-    int trim = 500; // how much to trim from both starts and ends of sync part
+    int trim = 250; // how much to trim from both starts and ends of sync part
     trim *= 100; // 100 when dt = 0.01
     int skip = 1; // plot every skip points
     int numthreads = omp_get_max_threads();
@@ -50,7 +51,7 @@ int main(){
     int plotDim2 = 4;
 
     std::cout << "calculating trajectory" << std::endl;
-    CoupledRossler CR(omega1, omega2, epsilon, a, c, f, dt, t_0, t, dump, x_0);
+    CoupledRossler CR(params, dt, t_0, t, dump, x_0);
     Eigen::MatrixXd trajectory = CR.get_trajectory(); //wide matrix
     Eigen::MatrixXd angles = Eigen::MatrixXd::Zero(trajectory.cols(), 2);
     for(int i=0; i < trajectory.cols(); i++){
@@ -135,9 +136,8 @@ int main(){
     // plt::xlabel("$t [sec]$");
     // plt::ylabel("$|U_{1}|$");
     plt::scatter(x, y);
-    plt::show();
     std::ostringstream oss;
-    oss << "../../sync/sync_epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_dt" << dt << "_t" << t << "_dump" << dump << "_omega" << omega1 << "-" << omega2 << "_"<<  window <<"window.png";
+    oss << "../../sync/sync_epsilon" << params.epsilon << "_t" << t << "_a" << params.a << "_c" << params.c << "_f" << params.f << "_omega" << params.omega1 << "-" << params.omega2 << "_dt" << dt << "_dump" << dump << "_window" << window <<".png";
     std::string plotfname = oss.str(); // 文字列を取得する
     std::cout << "Saving result to " << plotfname << std::endl;
     plt::save(plotfname);
@@ -158,7 +158,7 @@ int main(){
     */
         // reset oss
     oss.str("");
-    oss << "../../sync/sync_epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_dt" << dt << "_t" << t << "_dump" << dump << "_omega" << omega1 << "-" << omega2 << "_"<<  window <<"window.npy";
+    oss << "../../sync/npy/sync_epsilon" << params.epsilon << "_t" << t << "_a" << params.a << "_c" << params.c << "_f" << params.f << "_omega" << params.omega1 << "-" << params.omega2 << "_dt" << dt << "_dump" << dump << "_window" << window <<".npy";
     std::string fname = oss.str(); // 文字列を取得する
     std::cout << "Saving result to " << fname << std::endl;
     Eigen::MatrixXd matrix(synced.size(), synced[0].size());

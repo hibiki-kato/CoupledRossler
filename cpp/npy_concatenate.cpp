@@ -18,15 +18,15 @@
 namespace plt = matplotlibcpp;
 
 int main(){
-    const char* a_name = "../../generated_lam/sync_gen_laminar_beta_0.417nu_0.00018_dt0.01_50000period5000check500progress10^-14-10^-5perturb_5-8_5-11_5-14_8-11_8-14_11-14_6-9_6-12_9-12.npy";
-    const char* b_name = "../../generated_lam/sync_gen_laminar_beta_0.417nu_0.00018_dt0.01_50000period6000check500progress10^-10-10^-7perturb_5-8_5-11_5-14_8-11_8-14_11-14_6-9_6-12_9-12.npy";
-    int check_point = 30000; // the last time of a (not equal to time in the file name, usually a nice round number)
+    const char* a_name = "../generated_lam/sync_gen_laminar_epsilon0.038_a0.165_c10_f0.2_omega0.95-0.99_t100000_1500check100progress10^-16-10^-9perturb.npy";
+    const char* b_name = "../generated_lam/sync_gen_laminar_epsilon0.038_a0.165_c10_f0.2_omega0.95-0.99_t2000001500check200progress10^-16-10^-9perturb.npy";
+    int check_point = 1e+5; // the last time of a (not equal to time in the file name, usually a nice round number)
 
-    Eigen::MatrixXcd a = npy2EigenMat<std::complex<double>>(a_name);
-    Eigen::MatrixXcd b = npy2EigenMat<std::complex<double>>(b_name);
+    Eigen::MatrixXd a = npy2EigenMat<double>(a_name, true);
+    Eigen::MatrixXd b = npy2EigenMat<double>(b_name, true);
 
     check_point *= 100; //when dt = 0.01
-    Eigen::MatrixXcd c(a.rows(), check_point + b.cols());
+    Eigen::MatrixXd c(a.rows(), check_point + b.cols());
     c.leftCols(check_point) = a.leftCols(check_point);
     c.rightCols(b.cols()) = b;
     
@@ -34,7 +34,7 @@ int main(){
     // Add graph titlecc
     std::vector<double> x(c.cols()),y(c.cols());
     for(int i=0;i<c.cols();i++){
-        x[i]=c.cwiseAbs()(14, i);
+        x[i]=c(6, i);
         y[i]=i;
     }
 
@@ -43,6 +43,8 @@ int main(){
     std::cout << "Succeed?" << std::endl;
     char none;
     std::cin >> none;
-    EigenMat2npy(c, b_name);
+    std::string bname_str = std::string(b_name);
+    bname_str = "../" + bname_str;
+    EigenMat2npy(c,bname_str);
 
 }

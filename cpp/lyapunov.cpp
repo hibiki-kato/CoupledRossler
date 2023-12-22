@@ -39,14 +39,15 @@ int main() {
     auto start = std::chrono::system_clock::now(); // 計測開始時間
     double dt = 0.01;
     double t_0 = 0;
-    double t = 1e+6;
+    double t = 2e+5;
     double dump = 1e+4;
-    double omega1 = 0.95;
-    double omega2 = 0.99;
-    double epsilon = 0.039;
-    double a = 0.165;
-    double c = 10;
-    double f = 0.2;
+    CRparams params;
+    params.omega1 = 0.95;
+    params.omega2 = 0.99;
+    params.epsilon = 0.038;
+    params.a = 0.165;
+    params.c = 10;
+    params.f = 0.2;
     Eigen::VectorXd x_0 = npy2EigenVec<double>("../initials/chaotic.npy", true);
     std::random_device seed_gen;
     std::mt19937 engine(seed_gen());
@@ -55,15 +56,15 @@ int main() {
         x_0(i) = dist(engine);
     }
     
-    int numThreads = 8; //正確な計算を行うためには1スレッドで実行する必要がある
-    CoupledRossler CR(omega1, omega2, epsilon, a, c, f, dt, t_0, t, dump, x_0);
+    int numThreads = 1; //正確な計算を行うためには1スレッドで実行する必要がある
+    CoupledRossler CR(params, dt, t_0, t, dump, x_0);
     // 計算
-    std::cout << "calculating trajectory" << std::endl;
-    Eigen::MatrixXd traj =  CR.get_trajectory();
-    std::string suffix = ""; //ファイル名の後ろにつける文字列
+    // std::cout << "calculating trajectory" << std::endl;
+    // Eigen::MatrixXd traj =  CR.get_trajectory();
+    // std::string suffix = ""; //ファイル名の後ろにつける文字列
     // データの読み込みをここに記述
-    // Eigen::MatrixXd traj = npy2EigenMat<double>("../generated_lam/sync_gen_laminar_epsilon0.037_a0.165_c10_f0.2_omega0.95-0.99_t1000001000check100progress10^-16-10^-9perturb.npy", true);
-    // std::string suffix = "laminar"; //ファイル名の後ろにつける文字列
+    Eigen::MatrixXd traj = npy2EigenMat<double>("../generated_lam/sync_gen_laminar_epsilon0.038_a0.165_c10_f0.2_omega0.95-0.99_t2000001500check200progress10^-16-10^-9perturb.npy", true);
+    std::string suffix = "laminar"; //ファイル名の後ろにつける文字列
 
     Eigen::MatrixXd Data = traj.topRows(traj.rows() - 1);
     
@@ -163,14 +164,14 @@ int main() {
     plt::xlabel("Number");
     plt::ylabel("Lyapunov Exponents");
     std::ostringstream oss;
-    oss << "../../lyapunov/img/epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_dt" << dt << "_t" << t << "_omega(" << omega1 << "," << omega2 << ")_" << suffix << ".png";  // 文字列を結合する
+    oss << "../../lyapunov/img/epsilon" << params.epsilon << "_t" << t << "_a" << params.a << "_c" << params.c << "_f" << params.f << "_omega" << params.omega1 << "-" << params.omega2 << "_dt" << dt << "_dump" << dump << suffix << ".png";  // 文字列を結合する
     std::string plotfname = oss.str(); // 文字列を取得する
     std::cout << "Saving result to " << plotfname << std::endl;
     plt::save(plotfname);
 
     // xをテキストファイルに保存
     oss.str("");
-    oss << "../../lyapunov/epsilon" << epsilon << "_a" << a << "_c" << c << "_f" << f << "_dt" << dt << "_t" << t << "_omega(" << omega1 << "," << omega2 << ")_" << suffix << ".txt";  // 文字列を結合する
+    oss << "../../lyapunov/epsilon" << params.epsilon << "_t" << t << "_a" << params.a << "_c" << params.c << "_f" << params.f << "_omega" << params.omega1 << "-" << params.omega2 << "_dt" << dt << "_dump" << dump << suffix << ".txt";  // 文字列を結合する
     std::string fname = oss.str(); // 文字列を取得する
     std::cout << "saving as " << fname << std::endl;
     std::ofstream ofs(fname);

@@ -5,7 +5,7 @@ ENV OS_NAME=Linux
 
 RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections
 
-RUN apt update && apt-get update && export DEBIAN_FRONTEND=noninteractive \
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt install -y \
     build-essential \
     ninja-build \
@@ -13,8 +13,12 @@ RUN apt update && apt-get update && export DEBIAN_FRONTEND=noninteractive \
     libpython3-all-dev \
     python3-numpy \
     python3-matplotlib \
-    msttcorefonts \
-    ffmpeg 
+    python3-pip \
+    msttcorefonts -qq\
+    ffmpeg
+    
+RUN pip3 install --upgrade pip \
+    && pip3 install jupyterlab 
 
     # refresh matplotlib cache
     # && rm -r ~/.cache/matplotlib
