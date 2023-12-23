@@ -26,12 +26,12 @@ int main(){
     auto start = std::chrono::system_clock::now(); // 計測開始時間
     double dt = 0.01;
     double t_0 = 0;
-    double t = 1e+4;
+    double t = 1e+6;
     double dump = 1e+4;
     CRparams params;
     params.omega1 = 0.95;
     params.omega2 = 0.99;
-    params.epsilon = 0.03;
+    params.epsilon = 0.039;
     params.a = 0.165;
     params.c = 10;
     params.f = 0.2;
@@ -94,7 +94,7 @@ int main(){
     plotSettings["font.size"] = "15";
     plt::rcparams(plotSettings);
     // Set the size of output image = 1200x780 pixels
-    plt::figure_size(2400, 1600);
+    plt::figure_size(2400, 800);
 
     std::vector<double> x((trajectory.cols()-1)/skip),y((trajectory.cols()-1)/skip);
 
@@ -102,17 +102,6 @@ int main(){
     for(int i=0;i<x.size();i++){
         x[i]=trajectory(trajectory.rows()-1, i*skip);
     }
-    //plot phase
-    plt::subplot(2, 1, 1);
-    for(int i=0; i < 2; i++){
-        for(int j=0; j < y.size(); j++){
-            y[j]=angles(j*skip, i);
-        }
-        plt::plot(x,y, {{"label", "$\\phi_" + std::to_string(i+1) + "$"}});
-    }
-    plt::xlabel("t [sec]");
-    plt::ylabel("$\\phi$");
-    plt::legend();
 
     //plot phase difference
     Eigen::VectorXd diff = (angles.col(0) - angles.col(1)).cwiseAbs();
@@ -121,13 +110,12 @@ int main(){
     }
     double x_max = diff.maxCoeff();
     double y_max = diff.maxCoeff();
-    plt::subplot(2, 1, 2);
     for (int i = 0; i < y_max / M_PI / 2; i++){
         plt::axhline(i*2*M_PI, 0.0, x_max, {{"color", "gray"}, {"linestyle", ":"}});
     }
     plt::plot(x,y);
     plt::xlabel("t [sec]");
-    plt::ylabel("$|\\phi_1 -\\phi_2|$");
+    plt::ylabel("$|\\psi_{1,2}|$");
 
     std::ostringstream oss;
     oss << "../../phase_diff/epsilon" << params.epsilon << "_t" << t << "_a" << params.a << "_c" << params.c << "_f" << params.f << "_omega" << params.omega1 << "-" << params.omega2 << "_dt" << dt << "_dump" << dump << ".png";

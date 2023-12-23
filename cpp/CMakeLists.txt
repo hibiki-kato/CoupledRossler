@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(EXECUTABLE exe)
 
 add_executable(${EXECUTABLE} 
-    stagger_and_step_sync.cpp
+    extract_sync_online.cpp
     CoupledRossler.cpp
     myFunc.cpp
 )

@@ -1,10 +1,9 @@
 #include <iostream>
-#include <fstream>
 #include <sstream>
 #include <eigen3/Eigen/Dense>
 #include <cmath>
-#include "Runge_Kutta.hpp"
 #include <chrono>
+#include "Runge_Kutta.hpp"
 #include "cnpy/cnpy.h"
 #include "Eigen_numpy_converter.hpp"
 #include "myFunc.hpp"
@@ -15,7 +14,7 @@ int main(){
     auto start = std::chrono::system_clock::now(); // 計測開始時間
     double dt = 0.01;
     double t_0 = 0;
-    double t = 1e+5;
+    double t = 1e+6;
     double dump = 1e+4;
     CRparams params;
     params.omega1 = 0.95;

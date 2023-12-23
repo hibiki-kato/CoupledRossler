@@ -326,7 +326,7 @@ int main(){
             std::cout << "saving as " << fname << std::endl;
             EigenVec2npy(calced_laminar.topLeftCorner(calced_laminar.rows()-1, 1).col(0), fname);
         } else{
-            oss << "../../generated_lam_img/sync_gen_laminar_epsilon" << params.epsilon << "_t" << t << "_a" << params.a << "_c" << params.c << "_f" << params.f << "_omega" << params.omega1 << "-" << params.omega2  << "_" << check << "check" << progress << "progress10^" << logged_min_perturbation<<"-10^"<< logged_max_perturbation << "perturb.npy";
+            oss << "../../generated_lam/sync_gen_laminar_epsilon" << params.epsilon << "_t" << t << "_a" << params.a << "_c" << params.c << "_f" << params.f << "_omega" << params.omega1 << "-" << params.omega2  << "_" << check << "check" << progress << "progress10^" << logged_min_perturbation<<"-10^"<< logged_max_perturbation << "perturb.npy";
             std::string fname = oss.str(); // 文字列を取得する
             std::cout << "saving as " << fname << std::endl;
             EigenMat2npy(calced_laminar, fname);

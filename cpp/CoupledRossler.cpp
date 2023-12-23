@@ -96,6 +96,5 @@ Eigen::MatrixXd CoupledRossler::jacobi_matrix(const Eigen::VectorXd& state){
         epsilon, 0, 0, -epsilon, -omega2, -1,
         0, 0, 0, omega2, a, 0,
         0, 0, 0, z2, 0, x2-c;
-
     return J;
 }

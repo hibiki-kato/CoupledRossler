@@ -158,7 +158,7 @@ int main(){
     */
         // reset oss
     oss.str("");
-    oss << "../../sync/npy/sync_epsilon" << params.epsilon << "_t" << t << "_a" << params.a << "_c" << params.c << "_f" << params.f << "_omega" << params.omega1 << "-" << params.omega2 << "_dt" << dt << "_dump" << dump << "_window" << window <<".npy";
+    oss << "../../sync/npy/sync_epsilon" << params.epsilon << "_t" << t << "_a" << params.a << "_c" << params.c << "_f" << params.f << "_omega" << params.omega1 << "-" << params.omega2 << "_dt" << dt << "_dump" << dump << "_window" << window/100 <<".npy";
     std::string fname = oss.str(); // 文字列を取得する
     std::cout << "Saving result to " << fname << std::endl;
     Eigen::MatrixXd matrix(synced.size(), synced[0].size());
