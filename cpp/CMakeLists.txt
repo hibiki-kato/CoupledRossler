@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(EXECUTABLE exe)
 
 add_executable(${EXECUTABLE} 
-    extract_sync_online.cpp
+    laminar_duration.cpp
     CoupledRossler.cpp
     myFunc.cpp
 )

@@ -32,14 +32,14 @@ int main(){
     auto start = std::chrono::system_clock::now(); // 計測開始時間
     double dt = 0.01;
     double t_0 = 0;
-    double t = 1e+7;
+    double t = 1e+8;
     double dump = 1e+4;
     CRparams params;
     params.omega1 = 0.95;
     params.omega2 = 0.99;
     params.epsilon = 0.035;
-    int epsilon_num = 32;
-    Eigen::VectorXd epsilons = Eigen::VectorXd::LinSpaced(epsilon_num, 0.04, 0.0416);
+    int epsilon_num = 1;
+    Eigen::VectorXd epsilons = Eigen::VectorXd::LinSpaced(epsilon_num, 0.0416, 0.0416);
     params.a = 0.165;
     params.c = 10;
     params.f = 0.2;
@@ -48,8 +48,8 @@ int main(){
     double d = 1.2; //  if phase_diff is in 2πk + d ± sync_criteria then it is synchronized
     int numThreads = omp_get_max_threads();
 
-    int window = 400; // how long the sync part should be. (sec)
-    int trim = 200; // how much to trim from both starts and ends of sync part
+    int window = 1000; // how long the sync part should be. (sec)
+    int trim = 500; // how much to trim from both starts and ends of sync part
     int skip = 100; // period of checking sync(step)
     CoupledRossler CR(params, dt, t_0, t, dump, x_0);
     std::vector<double> average_durations(epsilon_num);
@@ -91,12 +91,12 @@ int main(){
                 std::cout << "\r processing " << progress  << "/" << epsilon_num << std::flush;
         }
         // //durationsを保存
-        // std::ostringstream oss;
-        // std::ofstream ofs("durations.txt");
-        // for (int i = 0; i < epsilon_num; i++){
-        //     ofs << epsilons(i) << " " << durations[i] << std::endl;
-        // }
-        // ofs.close();
+        std::ostringstream oss;
+        std::ofstream ofs("durations.txt");
+        for (int i = 0; i < epsilon_num; i++){
+            ofs << epsilons(i) << " " << durations[i] << std::endl;
+        }
+        ofs.close();
         average_durations[i] = std::accumulate(durations.begin(), durations.end(), 0.0) / durations.size();
     }
     // epsilonsとaverage_durationsを保存
