@@ -16,9 +16,9 @@
 #include "Runge_Kutta.hpp"
 #include <chrono>
 #include "cnpy/cnpy.h"
-#include "Eigen_numpy_converter.hpp"
-#include "myFunc.hpp"
-#include "matplotlibcpp.h"
+#include "shared/Eigen_numpy_converter.hpp"
+#include "shared/myFunc.hpp"
+#include "shared/matplotlibcpp.h"
 namespace plt = matplotlibcpp;
 
 int main(){
@@ -166,5 +166,5 @@ int main(){
     std::cout << "Saving result to " << plotfname << std::endl;
     plt::save(plotfname);
 
-    myfunc::duration(start, std::chrono::system_clock::now());
+    myfunc::duration(start);
 }

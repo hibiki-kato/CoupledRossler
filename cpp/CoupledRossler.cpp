@@ -23,8 +23,8 @@ CoupledRossler::CoupledRossler(CRparams input_params, double input_dt, double in
     
     int dim = 6;
     
-    steps = static_cast<long>((t - t_0) / dt+ 0.5);
-    dump_steps = static_cast<long>(dump / dt + 0.5);
+    steps = static_cast<long long>((t - t_0) / dt+ 0.5);
+    dump_steps = static_cast<long long>(dump / dt + 0.5);
  }
 //destructor
 CoupledRossler::~CoupledRossler(){
@@ -36,14 +36,14 @@ Eigen::MatrixXd CoupledRossler::get_trajectory(){
 
     //set initial point
     trajectory.topLeftCorner(row - 1, 1) = x_0;
-    //renew x_0 while reaching latter (dump)
-    for (long i = 0; i < dump_steps; i++){
+    //renew x_0 (dump)
+    for (long long i = 0; i < dump_steps; i++){
         trajectory.topLeftCorner(row - 1, 1) = CoupledRossler::rk4(trajectory.topLeftCorner(row - 1, 1));
     }
     //solve
     double time = t_0;
     trajectory(row-1, 0) = time;
-    for(long i = 0; i < steps; i++){
+    for(long long i = 0; i < steps; i++){
         time += dt;
         trajectory.block(0, i+1, row-1, 1) = CoupledRossler::rk4(trajectory.block(0, i, row-1, 1));
         trajectory(row-1, i+1) = time;

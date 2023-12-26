@@ -16,9 +16,9 @@
 #include "Runge_Kutta.hpp"
 #include <chrono>
 #include "cnpy/cnpy.h"
-#include "matplotlibcpp.h"
-#include "Eigen_numpy_converter.hpp"
-#include "myFunc.hpp"
+#include "shared/matplotlibcpp.h"
+#include "shared/Eigen_numpy_converter.hpp"
+#include "shared/myFunc.hpp"
 
 namespace plt = matplotlibcpp;
 std::tuple<Eigen::VectorXd, Eigen::VectorXd, Eigen::VectorXd> calc_next(CoupledRossler& CR, Eigen::VectorXd pre_n, Eigen::VectorXd pre_theta, Eigen::VectorXd previous);
@@ -46,7 +46,7 @@ int main(){
     int numThreads = omp_get_max_threads();
     std::cout << numThreads << " threads" << std::endl;
 
-    int window = 500; // how long the sync part should be. (sec)
+    int window = 500; // how long long the sync part should be. (sec)
     window *= 100; // 100 when dt = 0.01 
     int trim = 250; // how much to trim from both starts and ends of sync part
     trim *= 100; // 100 when dt = 0.01
@@ -131,7 +131,7 @@ int main(){
                 std::cout << "\r processing " << progress  << "/" << epsilon_num << std::flush;
         }
     }
-    myfunc::duration(start, std::chrono::system_clock::now());
+    myfunc::duration(start);
 }
 
 double shift(double pre_theta, double theta, double rotation_number){

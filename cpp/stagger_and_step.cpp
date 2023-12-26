@@ -17,9 +17,9 @@
 #include <chrono>
 #include <random>
 #include "cnpy/cnpy.h"
-#include "matplotlibcpp.h"
-#include "Eigen_numpy_converter.hpp"
-#include "myFunc.hpp"
+#include "shared/matplotlibcpp.h"
+#include "shared/Eigen_numpy_converter.hpp"
+#include "shared/myFunc.hpp"
 
 namespace plt = matplotlibcpp;
 bool isLaminar(Eigen::VectorXd state);
@@ -34,13 +34,13 @@ int main(){
     CRparams params;
     params.omega1 = 0.95;
     params.omega2 = 0.99;
-    params.epsilon = 0.038;
+    params.epsilon = 0.039;
     params.a = 0.165;
     params.c = 10;
     params.f = 0.2;
     // Eigen::MatrixXd loaded = npy2EigenMat<double>("../generated_lam/sync_gen_laminar_epsilon0.038_a0.165_c10_f0.2_omega0.95-0.99_t100000_1500check100progress10^-16-10^-9perturb.npy", true);
     // Eigen::VectorXd x_0 = loaded.block(0, t_0*100, 6, 1);
-    Eigen::VectorXd x_0 = npy2EigenVec<double>("../initials/epsilon0.038_a0.165_c10_f0.2_omega0.95-0.99_t1500.npy", true);
+    Eigen::VectorXd x_0 = npy2EigenVec<double>("../initials/epsilon0.039_a0.165_c10_f0.2_omega0.95-0.99_t2000.npy", true);
     // Eigen::VectorXd x_0 = (Eigen::VectorXd::Random(6).array()) * 10;
 
     double check = 2000;
@@ -304,7 +304,7 @@ int main(){
             EigenMat2npy(calced_laminar, fname);
         }
     }
-    myfunc::duration(start, std::chrono::system_clock::now());
+    myfunc::duration(start);
 }
 
 bool isLaminar(Eigen::VectorXd state){

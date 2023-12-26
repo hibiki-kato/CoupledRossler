@@ -28,8 +28,8 @@ struct CoupledRossler{
     double t;
     double dump;
     Eigen::VectorXd x_0;
-    long steps;
-    long dump_steps;
+    long long steps;
+    long long dump_steps;
 };
 
 

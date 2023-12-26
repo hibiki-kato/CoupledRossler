@@ -10,7 +10,7 @@
  */
 #pragma once
 #include <eigen3/Eigen/Dense>
-#include "cnpy/cnpy.h"
+#include "../cnpy/cnpy.h"
 #include <complex>
 #include <string>
 
@@ -82,7 +82,7 @@ Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> npy2EigenMat(const char* fname,
 
 template <typename Vector>
 void EigenVec2npy(Vector Vec, std::string fname){
-    long unsigned int size = Vec.size();
+    long long unsigned int size = Vec.size();
     std::vector<typename Vector::Scalar> data(2*size);
     for(int i = 0; i < size; i++){
         data[i] = Vec(i);

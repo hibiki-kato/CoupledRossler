@@ -9,7 +9,7 @@ set(EXECUTABLE exe)
 add_executable(${EXECUTABLE} 
     laminar_duration.cpp
     CoupledRossler.cpp
-    myFunc.cpp
+    shared/myFunc.cpp
 )
 
 # OSでソースが異なるので分岐

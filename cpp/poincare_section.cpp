@@ -9,8 +9,8 @@
 #include <chrono>
 #include <omp.h>
 #include "cnpy/cnpy.h"
-#include "matplotlibcpp.h"
-#include "Eigen_numpy_converter.hpp"
+#include "shared/matplotlibcpp.h"
+#include "shared/Eigen_numpy_converter.hpp"
 namespace plt = matplotlibcpp;
 Eigen::MatrixXd loc_max(const Eigen::MatrixXd& traj_abs, int obs_dim, double dt);
 Eigen::MatrixXd poincare_section(const Eigen::MatrixXd& traj_abs, int cut_dim, double cut_value);

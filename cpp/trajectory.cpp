@@ -5,16 +5,16 @@
 #include <chrono>
 #include "Runge_Kutta.hpp"
 #include "cnpy/cnpy.h"
-#include "Eigen_numpy_converter.hpp"
-#include "myFunc.hpp"
-#include "matplotlibcpp.h"
+#include "shared/Eigen_numpy_converter.hpp"
+#include "shared/myFunc.hpp"
+#include "shared/matplotlibcpp.h"
 namespace plt = matplotlibcpp;
 
 int main(){
     auto start = std::chrono::system_clock::now(); // 計測開始時間
     double dt = 0.01;
     double t_0 = 0;
-    double t = 1e+6;
+    double t = 1e+8;
     double dump = 1e+4;
     CRparams params;
     params.omega1 = 0.95;
@@ -94,5 +94,5 @@ int main(){
     std::cout << "Saving result to " << npyfname << std::endl;
     // EigenMat2npy(trajectory, npyfname);
     
-    myfunc::duration(start, std::chrono::system_clock::now());
+    myfunc::duration(start);
 }

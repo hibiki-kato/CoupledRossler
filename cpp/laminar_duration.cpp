@@ -15,13 +15,16 @@
 #include <cmath>
 #include <chrono> 
 #include <omp.h>
+#include <vector>
+#include <string>
+#include <map>
 #include <numeric>
 #include <atomic>
 #include "Runge_Kutta.hpp"
 #include "cnpy/cnpy.h"
-#include "matplotlibcpp.h"
-#include "Eigen_numpy_converter.hpp"
-#include "myFunc.hpp"
+#include "shared/matplotlibcpp.h"
+#include "shared/Eigen_numpy_converter.hpp"
+#include "shared/myFunc.hpp"
 
 namespace plt = matplotlibcpp;
 std::tuple<Eigen::VectorXd, Eigen::VectorXd, Eigen::VectorXd> calc_next(CoupledRossler& CR, Eigen::VectorXd pre_n, Eigen::VectorXd pre_theta, Eigen::VectorXd previous);
@@ -38,24 +41,23 @@ int main(){
     params.omega1 = 0.95;
     params.omega2 = 0.99;
     params.epsilon = 0.035;
-    int epsilon_num = 1;
-    Eigen::VectorXd epsilons = Eigen::VectorXd::LinSpaced(epsilon_num, 0.0416, 0.0416);
+    int epsilon_num = 96;
+    Eigen::VectorXd epsilons = Eigen::VectorXd::LinSpaced(epsilon_num, 0.038, 0.042);
     params.a = 0.165;
     params.c = 10;
     params.f = 0.2;
     Eigen::VectorXd x_0 = npy2EigenVec<double>("../initials/chaotic.npy", true);
-    double sync_criteria = 0.9;
+    double sync_criteria = 5;
     double d = 1.2; //  if phase_diff is in 2πk + d ± sync_criteria then it is synchronized
     int numThreads = omp_get_max_threads();
 
-    int window = 1000; // how long the sync part should be. (sec)
-    int trim = 500; // how much to trim from both starts and ends of sync part
+    int window = 500; // how long the sync part should be. (sec)
+    int trim = 250; // how much to trim from both starts and ends of sync part
     int skip = 100; // period of checking sync(step)
     CoupledRossler CR(params, dt, t_0, t, dump, x_0);
     std::vector<double> average_durations(epsilon_num);
-    int steps = static_cast<int>((t - t_0) / dt + 0.5);
-    std::atomic<int> progress(0);
-    #pragma omp parallel for num_threads(numThreads) schedule(dynamic) firstprivate(CR, sync_criteria, d, steps, epsilons, window, trim, skip) shared(progress, average_durations)
+    int progress;
+    #pragma omp parallel for num_threads(numThreads) schedule(dynamic) firstprivate(CR, sync_criteria, d, epsilons, window, trim, skip) shared(progress, average_durations)
     for (int i = 0; i < epsilon_num; i++) {
         CR.epsilon = epsilons(i);
         Eigen::VectorXd previous = CR.x_0;
@@ -63,14 +65,14 @@ int main(){
         Eigen::VectorXd theta(2);
         theta(0) = std::atan2(previous(1), previous(0)); // rotation angle of system1
         theta(1) = std::atan2(previous(4), previous(3));
-        double duration;
-        std::vector<double> durations;
+        long long duration;
+        std::vector<long long> durations;
         // dump
         for (int j = 0; j < CR.dump_steps; j++) {
             std::tie(n, theta, previous) = calc_next(CR, n, theta, previous);
         }
         
-        for (int j = 0; j < steps; j++) {
+        for (long long j = 0; j < CR.steps; j++) {
             std::tie(n, theta, previous) = calc_next(CR, n, theta, previous);
             if(j % skip == 0){
                 if (isSync(theta(0) + 2*n(0)*M_PI, theta(1) + 2*n(1)*M_PI, sync_criteria, d)){
@@ -86,22 +88,23 @@ int main(){
         if (duration-trim*2 > window){
             durations.push_back(duration-trim*2);
         }
+        #pragma omp atomic
         progress++;
         if (omp_get_thread_num() == 0) {
                 std::cout << "\r processing " << progress  << "/" << epsilon_num << std::flush;
         }
-        // //durationsを保存
+        //durationsを保存
         std::ostringstream oss;
         std::ofstream ofs("durations.txt");
-        for (int i = 0; i < epsilon_num; i++){
-            ofs << epsilons(i) << " " << durations[i] << std::endl;
+        for (int j = 0; j < durations.size(); i++){
+            ofs << durations[j] << std::endl;
         }
         ofs.close();
         average_durations[i] = std::accumulate(durations.begin(), durations.end(), 0.0) / durations.size();
     }
     // epsilonsとaverage_durationsを保存
     std::ostringstream oss;
-    oss << "../../average_durations/data/epsilon" << epsilons(0) << "-" << epsilons(epsilon_num-1) << "num" << "_t" << t << "_a" << params.a << "_c" << params.c << "_f" << params.f << "_omega" << params.omega1 << "-" << params.omega2 << "_dt" << dt << "_window" << window <<".txt";
+    oss << "../../average_durations/data/epsilon" << epsilons(0) << "-" << epsilons(epsilon_num-1) << "_" << epsilon_num << "num" << "_t" << t << "_a" << params.a << "_c" << params.c << "_f" << params.f << "_omega" << params.omega1 << "-" << params.omega2 << "_dt" << dt << "_window" << window <<".txt";
     std::string fname = oss.str(); // 文字列を取得する
     std::cout << "Saving result to " << fname << std::endl;
     std::ofstream ofs(fname);
@@ -127,12 +130,12 @@ int main(){
 
     // save
     oss.str("");
-    oss << "../../average_durations/epsilon" << epsilons(0) << "-" << epsilons(epsilon_num-1) << "num" << "_t" << t << "_a" << params.a << "_c" << params.c << "_f" << params.f << "_omega" << params.omega1 << "-" << params.omega2 << "_dt" << dt << "_window" << window <<".png";
+    oss << "../../average_durations/epsilon" << epsilons(0) << "-" << epsilons(epsilon_num-1) << "_" << epsilon_num << "num" << "_t" << t << "_a" << params.a << "_c" << params.c << "_f" << params.f << "_omega" << params.omega1 << "-" << params.omega2 << "_dt" << dt << "_window" << window <<".png";
     std::string plotfname = oss.str(); // 文字列を取得する
     std::cout << "Saving result to " << plotfname << std::endl;
     plt::save(plotfname);
 
-    myfunc::duration(start, std::chrono::system_clock::now());
+    myfunc::duration(start);
 }
 
 double shift(double pre_theta, double theta, double rotation_number){

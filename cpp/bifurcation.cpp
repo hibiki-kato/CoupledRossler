@@ -9,7 +9,7 @@
 #include <chrono>
 #include <omp.h>
 #include "cnpy/cnpy.h"
-#include "matplotlibcpp.h"
+#include "shared/matplotlibcpp.h"
 namespace plt = matplotlibcpp;
 Eigen::MatrixXd loc_max(const Eigen::MatrixXd& traj_abs, int obs_dim);
 Eigen::VectorXcd npy2EigenVec(const char* fname);

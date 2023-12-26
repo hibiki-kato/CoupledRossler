@@ -22,9 +22,9 @@
 #include <eigen3/Eigen/Core>
 #include "Runge_Kutta.hpp"
 #include "cnpy/cnpy.h"
-#include "matplotlibcpp.h"
-#include "Eigen_numpy_converter.hpp"
-#include "myFunc.hpp"
+#include "shared/matplotlibcpp.h"
+#include "shared/Eigen_numpy_converter.hpp"
+#include "shared/myFunc.hpp"
 namespace plt = matplotlibcpp;
 
 using namespace Eigen;
@@ -180,7 +180,7 @@ int main() {
     }
     ofs.close();
 
-    myfunc::duration(start, std::chrono::system_clock::now()); // 計測終了時間
+    myfunc::duration(start); // 計測終了時間
 }
 
 // ルンゲ＝クッタ法を用いた"ヤコビアン"による時間発展

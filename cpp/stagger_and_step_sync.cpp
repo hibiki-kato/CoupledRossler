@@ -17,9 +17,9 @@
 #include <chrono>
 #include <random>
 #include "cnpy/cnpy.h"
-#include "matplotlibcpp.h"
-#include "Eigen_numpy_converter.hpp"
-#include "myFunc.hpp"
+#include "shared/matplotlibcpp.h"
+#include "shared/Eigen_numpy_converter.hpp"
+#include "shared/myFunc.hpp"
 
 namespace plt = matplotlibcpp;
 int shift(double pre_theta, double theta, int rotation_number);
@@ -30,13 +30,13 @@ Eigen::VectorXd perturbation(Eigen::VectorXd state, int perturb_min, int perturb
 int main(){
     auto start = std::chrono::system_clock::now(); // 計測開始時間
     double dt = 0.01;
-    double t_0 = 1e+5;
-    double t = 2e+5;
+    double t_0 = 0;
+    double t = 1e+5;
     double dump = 0;
     CRparams params;
     params.omega1 = 0.95;
     params.omega2 = 0.99;
-    params.epsilon = 0.038;
+    params.epsilon = 0.039;
     params.a = 0.165;
     params.c = 10;
     params.f = 0.2;
@@ -332,7 +332,7 @@ int main(){
             EigenMat2npy(calced_laminar, fname);
         }
     }
-    myfunc::duration(start, std::chrono::system_clock::now());
+    myfunc::duration(start);
 }
 
 double shift(double pre_theta, double theta, double rotation_number){

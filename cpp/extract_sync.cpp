@@ -16,9 +16,9 @@
 #include "Runge_Kutta.hpp"
 #include <chrono>
 #include "cnpy/cnpy.h"
-#include "matplotlibcpp.h"
-#include "Eigen_numpy_converter.hpp"
-#include "myFunc.hpp"
+#include "shared/matplotlibcpp.h"
+#include "shared/Eigen_numpy_converter.hpp"
+#include "shared/myFunc.hpp"
 
 namespace plt = matplotlibcpp;
 int shift(double pre_theta, double theta, int rotation_number);
@@ -41,7 +41,7 @@ int main(){
     double sync_criteria = 0.8;
     double d = 1.2; //  if phase_diff is in 2πk + d ± sync_criteria then it is synchronized
 
-    int window = 500; // how long the sync part should be. (sec)
+    int window = 500; // how long long the sync part should be. (sec)
     window *= 100; // 100 when dt = 0.01 
     int trim = 250; // how much to trim from both starts and ends of sync part
     trim *= 100; // 100 when dt = 0.01
@@ -169,7 +169,7 @@ int main(){
     }
     EigenMat2npy(matrix, fname);
 
-    myfunc::duration(start, std::chrono::system_clock::now());
+    myfunc::duration(start);
 }
 
 int shift(double pre_theta, double theta, int rotation_number){
