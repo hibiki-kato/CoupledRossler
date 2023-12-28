@@ -13,17 +13,15 @@
 #include <sstream>
 #include <eigen3/Eigen/Dense>
 #include <cmath>
-#include "Runge_Kutta.hpp"
+#include "shared/Flow.hpp"
 #include <chrono>
-#include "cnpy/cnpy.h"
+#include "shared/myFunc.hpp"
+#include "shared/Flow.hpp"
 #include "shared/matplotlibcpp.h"
 #include "shared/Eigen_numpy_converter.hpp"
-#include "shared/myFunc.hpp"
 
 namespace plt = matplotlibcpp;
 std::tuple<Eigen::VectorXd, Eigen::VectorXd, Eigen::VectorXd> calc_next(CoupledRossler& CR, Eigen::VectorXd pre_n, Eigen::VectorXd pre_theta, Eigen::VectorXd previous);
-int shift(double pre_theta, double theta, int rotation_number);
-bool isSync(double a, double b, double sync_criteria, double center);
 
 int main(){
     auto start = std::chrono::system_clock::now(); // 計測開始時間
@@ -78,7 +76,7 @@ int main(){
         
         for (int j = 0; j < steps; j++) {
             std::tie(n, theta, previous) = calc_next(CR, n, theta, previous);
-            if (isSync(theta(0) + 2*n(0)*M_PI, theta(1) + 2*n(1)*M_PI, sync_criteria, d)){
+            if (myfunc::isSync(theta(0) + 2*n(0)*M_PI, theta(1) + 2*n(1)*M_PI, sync_criteria, d)){
                 x.push_back(previous(plotDim[0]-1));
                 y.push_back(previous(plotDim[1]-1));
             }
@@ -134,45 +132,3 @@ int main(){
     myfunc::duration(start);
 }
 
-double shift(double pre_theta, double theta, double rotation_number){
-    //forward
-    if ((theta - pre_theta) < -M_PI){
-        rotation_number += 1;
-    }
-    //backward
-    else if ((theta - pre_theta) > M_PI){
-        rotation_number -= 1;
-    }
-    return rotation_number;
-}
-
-
-
-std::tuple<Eigen::VectorXd, Eigen::VectorXd, Eigen::VectorXd> calc_next(CoupledRossler& CR, Eigen::VectorXd pre_n, Eigen::VectorXd pre_theta, Eigen::VectorXd previous){
-    Eigen::VectorXd now = CR.rk4(previous);
-    Eigen::VectorXd theta(2);
-    theta(0) = std::atan2(now(1), now(0)); // rotation angle of system1
-    theta(1) = std::atan2(now(4), now(3));
-    Eigen::VectorXd n = pre_n;
-    for(int i; i < theta.size(); i++){
-        n(i) = shift(pre_theta(i), theta(i), pre_n(i));
-    }
-    return std::make_tuple(n, theta, now);
-}
-
-bool isSync(double a, double b, double sync_criteria, double center) {
-    double lowerBound = center - sync_criteria;
-    double upperBound = center + sync_criteria;
-    int n = 0;
-    double diff = std::abs(a - b);
-    // std::cout << diff << std::endl;
-    while (lowerBound <= diff) {
-        if (lowerBound <= diff && diff <= upperBound) {
-            return true;
-        }
-        n++;
-        lowerBound += 2  * M_PI;
-        upperBound += 2  * M_PI;
-    }
-    return false;
-}

@@ -9,21 +9,18 @@
  * 
  */
 #include <iostream>
-#include <fstream>
 #include <sstream>
 #include <eigen3/Eigen/Dense>
 #include <cmath>
-#include "Runge_Kutta.hpp"
 #include <chrono>
 #include <random>
-#include "cnpy/cnpy.h"
+#include "shared/Flow.hpp"
+#include "shared/myFunc.hpp"
 #include "shared/matplotlibcpp.h"
 #include "shared/Eigen_numpy_converter.hpp"
-#include "shared/myFunc.hpp"
 
 namespace plt = matplotlibcpp;
 bool isLaminar(Eigen::VectorXd state);
-Eigen::VectorXd perturbation(Eigen::VectorXd state, int perturb_min, int perturb_max);
 
 int main(){
     auto start = std::chrono::system_clock::now(); // 計測開始時間
@@ -140,7 +137,7 @@ int main(){
                 bool Local_laminar = true; // flag
                 CoupledRossler Local_CR = CR; // copy of CR
                 double Local_now_time = Local_CR.t_0;
-                Eigen::VectorXd Local_x_0 = perturbation(Local_CR.x_0, perturb_min, perturb_max); // perturbed initial state
+                Eigen::VectorXd Local_x_0 = myfunc::perturbation(Local_CR.x_0, perturb_min, perturb_max); // perturbed initial state
                 Eigen::VectorXd Local_now = Local_x_0;
                 Eigen::MatrixXd Local_trajectory = Eigen::MatrixXd::Zero(num_variables+1, progress_steps+1); //wide matrix for progress
                 Local_trajectory.topLeftCorner(num_variables, 1) = Local_now;
@@ -314,19 +311,4 @@ bool isLaminar(Eigen::VectorXd state){
     else{
         return false;
     }
-}
-
-Eigen::VectorXd perturbation(Eigen::VectorXd state, int s_min, int s_max){
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<double> s(-1, 1);
-    std::uniform_real_distribution<double> expo(s_min, s_max);
-
-    Eigen::VectorXd u = Eigen::VectorXd::Ones(state.rows());
-    for(int i = 0; i < state.rows(); i++){
-        u(i) = s(gen);
-    }
-    u /= u.norm();
-
-    return (u.array() * std::pow(10, expo(gen)) + state.array()).matrix();
 }

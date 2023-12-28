@@ -7,9 +7,10 @@ set(CMAKE_CXX_STANDARD 23)
 set(EXECUTABLE exe)
 
 add_executable(${EXECUTABLE} 
-    laminar_duration.cpp
-    CoupledRossler.cpp
+    trajectory.cpp
     shared/myFunc.cpp
+    shared/Flow.cpp
+    shared/Map.cpp
 )
 
 # OSでソースが異なるので分岐
@@ -27,7 +28,7 @@ else()
 endif()
 
 #ライブラリを作成
-add_library(cnpy "cnpy/cnpy.cpp")
+add_library(cnpy "shared/cnpy/cnpy.cpp")
 target_link_libraries(${EXECUTABLE} PUBLIC z cnpy Python::Python Python::NumPy)
 
 #キャッシュなし

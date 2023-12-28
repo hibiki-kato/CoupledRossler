@@ -13,22 +13,19 @@
 #include <sstream>
 #include <eigen3/Eigen/Dense>
 #include <cmath>
-#include "Runge_Kutta.hpp"
 #include <chrono>
-#include "cnpy/cnpy.h"
+#include "shared/myFunc.hpp"
+#include "shared/Flow.hpp"
 #include "shared/matplotlibcpp.h"
 #include "shared/Eigen_numpy_converter.hpp"
-#include "shared/myFunc.hpp"
 
 namespace plt = matplotlibcpp;
-int shift(double pre_theta, double theta, int rotation_number);
-bool isSync(double a, double b, double sync_criteria, double center);
 
 int main(){
     auto start = std::chrono::system_clock::now(); // 計測開始時間
     double dt = 0.01;
     double t_0 = 0;
-    double t = 1e+5;
+    double t = 1e+3;
     double dump = 0;
     CRparams params;
     params.omega1 = 0.95;
@@ -82,7 +79,7 @@ int main(){
     synced.resize(trajectory.rows());
     int counter = 0;
     for (int i = 0; i < angles.rows(); i++){
-        if (isSync(angles(i, 0), angles(i, 1), sync_criteria, d)){
+        if (myfunc::isSync(angles(i, 0), angles(i, 1), sync_criteria, d)){
             counter++;
         }
         else{
@@ -170,43 +167,4 @@ int main(){
     EigenMat2npy(matrix, fname);
 
     myfunc::duration(start);
-}
-
-int shift(double pre_theta, double theta, int rotation_number){
-    //forward
-    if ((theta - pre_theta) < -M_PI){
-        rotation_number += 1;
-    }
-    //backward
-    else if ((theta - pre_theta) > M_PI){
-        rotation_number -= 1;
-    }
-
-    return rotation_number;
-}
-
-/**
- * @brief given 2 angles, check if they are in sync
- * 
- * @param a : angle 1
- * @param b  : angle 2
- * @param epsilon : tolerance
- * @return true : sync
- * @return false : not sync
- */
-bool isSync(double a, double b, double sync_criteria, double center) {
-    double lowerBound = center - sync_criteria;
-    double upperBound = center + sync_criteria;
-    int n = 0;
-    double diff = std::abs(a - b);
-    // std::cout << diff << std::endl;
-    while (lowerBound <= diff) {
-        if (lowerBound <= diff && diff <= upperBound) {
-            return true;
-        }
-        n++;
-        lowerBound += 2  * M_PI;
-        upperBound += 2  * M_PI;
-    }
-    return false;
 }

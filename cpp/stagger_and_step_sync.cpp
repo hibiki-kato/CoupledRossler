@@ -13,19 +13,16 @@
 #include <sstream>
 #include <eigen3/Eigen/Dense>
 #include <cmath>
-#include "Runge_Kutta.hpp"
 #include <chrono>
 #include <random>
-#include "cnpy/cnpy.h"
+#include "shared/myFunc.hpp"
+#include "shared/Flow.hpp"
 #include "shared/matplotlibcpp.h"
 #include "shared/Eigen_numpy_converter.hpp"
-#include "shared/myFunc.hpp"
 
 namespace plt = matplotlibcpp;
-int shift(double pre_theta, double theta, int rotation_number);
 bool isLaminar(Eigen::VectorXd phases, double sync_criteria, double center);
 std::tuple<Eigen::VectorXd, Eigen::VectorXd, Eigen::VectorXd> calc_next(CoupledRossler& CR, Eigen::VectorXd pre_n, Eigen::VectorXd pre_theta, Eigen::VectorXd previous);
-Eigen::VectorXd perturbation(Eigen::VectorXd state, int perturb_min, int perturb_max);
 
 int main(){
     auto start = std::chrono::system_clock::now(); // 計測開始時間
@@ -155,7 +152,7 @@ int main(){
                 bool Local_laminar = true; // flag
                 CoupledRossler Local_CR = CR; // copy of CR
                 double Local_now_time = Local_CR.t_0;
-                Eigen::VectorXd Local_x_0 = perturbation(Local_CR.x_0, perturb_min, perturb_max); // perturbed initial state
+                Eigen::VectorXd Local_x_0 = myfunc::perturbation(Local_CR.x_0, perturb_min, perturb_max); // perturbed initial state
                 Eigen::VectorXd Local_now = Local_x_0;
                 Eigen::MatrixXd Local_trajectory = Eigen::MatrixXd::Zero(num_variables+1, progress_steps+1); //wide matrix for progress
                 Local_trajectory.topLeftCorner(num_variables, 1) = Local_now;
@@ -335,19 +332,6 @@ int main(){
     myfunc::duration(start);
 }
 
-double shift(double pre_theta, double theta, double rotation_number){
-    //forward
-    if ((theta - pre_theta) < -M_PI){
-        rotation_number += 1;
-    }
-    //backward
-    else if ((theta - pre_theta) > M_PI){
-        rotation_number -= 1;
-    }
-
-    return rotation_number;
-}
-
 bool isLaminar(Eigen::VectorXd phases, double sync_criteria, double center){
         bool is_sync = false;
         double phase_diff = std::abs(phases(0)-phases(1));
@@ -365,22 +349,7 @@ std::tuple<Eigen::VectorXd, Eigen::VectorXd, Eigen::VectorXd> calc_next(CoupledR
     theta(1) = std::atan2(now(4), now(3)); // rotation angle of system2
     Eigen::VectorXd n = pre_n;
     for(int i; i < theta.size(); i++){
-        n(i) = shift(pre_theta(i), theta(i), pre_n(i));
+        n(i) = myfunc::shift(pre_theta(i), theta(i), pre_n(i));
     }
     return std::make_tuple(n, theta, now);
-}
-
-Eigen::VectorXd perturbation(Eigen::VectorXd state, int s_min, int s_max){
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<double> s(-1, 1);
-    std::uniform_real_distribution<double> expo(s_min, s_max);
-
-    Eigen::VectorXd u = Eigen::VectorXd::Ones(state.rows());
-    for(int i = 0; i < state.rows(); i++){
-        u(i) = s(gen);
-    }
-    u /= u.norm();
-
-    return (u.array() * std::pow(10, expo(gen)) + state.array()).matrix();
 }

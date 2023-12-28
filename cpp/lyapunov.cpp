@@ -13,26 +13,16 @@
 #include <vector>
 #include <complex>
 #include <cmath>
-#include <math.h>
 #include <random>
 #include <chrono>
 #include <numeric>
-#include <omp.h>
 #include <eigen3/Eigen/Dense>
 #include <eigen3/Eigen/Core>
-#include "Runge_Kutta.hpp"
-#include "cnpy/cnpy.h"
+#include "shared/Flow.hpp"
 #include "shared/matplotlibcpp.h"
 #include "shared/Eigen_numpy_converter.hpp"
 #include "shared/myFunc.hpp"
 namespace plt = matplotlibcpp;
-
-using namespace Eigen;
-
-// 関数プロトタイプ
-VectorXd computeDerivativeJacobian(const VectorXd& state, const MatrixXd& jacobian);
-VectorXd rungeKuttaJacobian(const VectorXd& state, const MatrixXd& jacobian, double dt);
-
 
 // メイン関数
 int main() {
@@ -94,13 +84,13 @@ int main() {
     
 
     //任意の直行行列を用意する
-    MatrixXd Base = Eigen::MatrixXd::Random(numVariables, numVariables);
-    HouseholderQR<MatrixXd> qr_1(Base);
+    Eigen::MatrixXd Base = Eigen::MatrixXd::Random(numVariables, numVariables);
+    Eigen::HouseholderQR<Eigen::MatrixXd> qr_1(Base);
     Base = qr_1.householderQ();
     // 総和の初期化
-    VectorXd sum = Eigen::VectorXd::Zero(numVariables);
+    Eigen::VectorXd sum = Eigen::VectorXd::Zero(numVariables);
     // 次のステップ(QR分解されるもの)
-    MatrixXd next(numVariables, numVariables);
+    Eigen::MatrixXd next(numVariables, numVariables);
     
     #pragma omp declare reduction(vec_add : Eigen::VectorXd : omp_out += omp_in) \
         initializer(omp_priv = Eigen::VectorXd::Zero(omp_orig.size()))
@@ -118,10 +108,10 @@ int main() {
             Eigen::MatrixXd jacobian = CR.jacobi_matrix(Data.col(j));
             // ヤコビアンとBase(直行行列)の積を計算する
             for (int k = 0; k < numVariables; ++k) {
-                next.col(k) = rungeKuttaJacobian(Base.col(k), jacobian, dt);
+                next.col(k) = myfunc::rungeKuttaJacobian(Base.col(k), jacobian, dt);
             }
             // QR分解を行う
-            HouseholderQR<MatrixXd> qr(next);
+            Eigen::HouseholderQR<Eigen::MatrixXd> qr(next);
             // 直交行列QでBaseを更新
             Base = qr.householderQ();
             // Rの対角成分を総和に加える
@@ -137,7 +127,7 @@ int main() {
         }
     }
 
-    VectorXd lyapunovExponents = sum.array() / (numTimeSteps * dt); // 1秒あたりの変化量に変換
+    Eigen::VectorXd lyapunovExponents = sum.array() / (numTimeSteps * dt); // 1秒あたりの変化量に変換
 
     // 結果の表示
     std::cout << lyapunovExponents.rows() << std::endl;
@@ -181,25 +171,4 @@ int main() {
     ofs.close();
 
     myfunc::duration(start); // 計測終了時間
-}
-
-// ルンゲ＝クッタ法を用いた"ヤコビアン"による時間発展
-VectorXd rungeKuttaJacobian(const VectorXd& state, const MatrixXd& jacobian, double dt){
-    VectorXd k1, k2, k3, k4;
-    VectorXd nextState;
-    
-    k1 = dt * computeDerivativeJacobian(state, jacobian);
-    k2 = dt * computeDerivativeJacobian(state + 0.5 * k1, jacobian);
-    k3 = dt * computeDerivativeJacobian(state + 0.5 * k2, jacobian);
-    k4 = dt * computeDerivativeJacobian(state + k3, jacobian);
-
-    nextState = state + (k1 + 2.0 * k2 + 2.0 * k3 + k4) / 6.0;
-
-    return nextState;
-}
-
-VectorXd computeDerivativeJacobian(const VectorXd& state, const MatrixXd& jacobian) {
-    VectorXd derivative(state.rows());
-    derivative = jacobian * state;
-    return derivative;
 }

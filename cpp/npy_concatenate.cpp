@@ -12,7 +12,6 @@
 #include <iostream>
 #include <complex>
 #include "shared/matplotlibcpp.h"
-#include "cnpy/cnpy.h"
 #include "shared/Eigen_numpy_converter.hpp"
 
 namespace plt = matplotlibcpp;

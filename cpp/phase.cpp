@@ -13,11 +13,10 @@
 #include <sstream>
 #include <eigen3/Eigen/Dense>
 #include <cmath>
-#include "Runge_Kutta.hpp"
 #include <chrono>
-#include "cnpy/cnpy.h"
-#include "shared/Eigen_numpy_converter.hpp"
 #include "shared/myFunc.hpp"
+#include "shared/Flow.hpp"
+#include "shared/Eigen_numpy_converter.hpp"
 #include "shared/matplotlibcpp.h"
 namespace plt = matplotlibcpp;
 
@@ -35,7 +34,7 @@ int main(){
     params.c = 10;
     params.f = 0.2;
     Eigen::VectorXd x_0 = (Eigen::VectorXd::Random(6).array() + 1) / 2;
-    int numthreads = omp_get_max_threads();
+    int numThreads = omp_get_max_threads();
     CoupledRossler CR(params, dt, t_0, t, dump, x_0);
     Eigen::MatrixXd trajectory = CR.get_trajectory();
     /*                                                                        
@@ -107,7 +106,7 @@ int main(){
     std::cout << "unwrapping angles" << std::endl;
 
     //unwrap
-    #pragma omp parallel for num_threads(numthreads)
+    #pragma omp parallel for num_threads(numThreads)
     for (int i = 0; i < angles.cols(); i++){
         int rotation_number = 0;
         for (int j = 0; j < angles.rows(); j++){

@@ -10,7 +10,7 @@
  */
 #pragma once
 #include <eigen3/Eigen/Dense>
-#include "../cnpy/cnpy.h"
+#include "cnpy/cnpy.h"
 #include <complex>
 #include <string>
 
